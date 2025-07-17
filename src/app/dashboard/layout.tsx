@@ -131,10 +131,10 @@ export default function DashboardLayout({
                           <SidebarMenuSubItem key={item.href}>
                               <Link href={item.href} className="w-full" passHref>
                                 <SidebarMenuSubButton asChild isActive={typeof window !== 'undefined' && pathname + window.location.search === item.href}>
-                                  <a>
+                                  <>
                                     <item.icon className="h-5 w-5" />
                                     <span>{item.label}</span>
-                                  </a>
+                                  </>
                                 </SidebarMenuSubButton>
                               </Link>
                           </SidebarMenuSubItem>
