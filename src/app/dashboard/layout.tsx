@@ -129,7 +129,7 @@ export default function DashboardLayout({
                   <SidebarMenuSub>
                       {payBillsItems.map((item) => (
                           <SidebarMenuSubItem key={item.href}>
-                              <Link href={item.href} className="w-full" passHref>
+                              <Link href={item.href} legacyBehavior passHref>
                                 <SidebarMenuSubButton asChild isActive={typeof window !== 'undefined' && pathname + window.location.search === item.href}>
                                   <a>
                                     <item.icon className="h-5 w-5" />
