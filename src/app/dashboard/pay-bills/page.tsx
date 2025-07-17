@@ -53,6 +53,16 @@ const tvSubscriptionFormSchema = z.object({
   }),
 });
 
+const internetFormSchema = z.object({
+    provider: z.string({ required_error: 'Please select a provider.' }),
+    bundlePackage: z.string({ required_error: 'Please select a package.' }),
+    amount: z.coerce.number(),
+    phoneNumber: z.string().min(9, { message: 'Please enter a valid 9-digit phone number.' }).max(9, { message: 'Please enter a valid 9-digit phone number.' }),
+    paymentFlow: z.enum(['direct', 'redirect'], {
+      required_error: 'You need to select a payment method.',
+    }),
+});
+
 function EneoPaymentForm() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -477,7 +487,7 @@ function TvSubscriptionForm() {
                 <FormItem>
                   <FormLabel>Amount (XAF)</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} readOnly disabled={isSubmitting} className="bg-muted" />
+                    <Input type="number" {...field} value={field.value ?? 0} onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} readOnly disabled={isSubmitting} className="bg-muted" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -547,6 +557,240 @@ function TvSubscriptionForm() {
   );
 }
 
+function InternetPaymentForm() {
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
+    const internetBundles = {
+      mtn: [
+        { name: '100MB (1 Day)', amount: 100 },
+        { name: '500MB (7 Days)', amount: 500 },
+        { name: '1GB (30 Days)', amount: 1000 },
+      ],
+      orange: [
+        { name: '150MB (1 Day)', amount: 150 },
+        { name: '600MB (7 Days)', amount: 600 },
+        { name: '1.2GB (30 Days)', amount: 1200 },
+      ],
+      'camtel-blue': [
+        { name: '2GB (7 Days)', amount: 1000 },
+        { name: '10GB (30 Days)', amount: 5000 },
+        { name: '25GB (30 Days)', amount: 10000 },
+      ],
+      nexttel: [
+        { name: '200MB (1 Day)', amount: 100 },
+        { name: '1GB (7 Days)', amount: 500 },
+        { name: '2GB (30 Days)', amount: 1000 },
+      ],
+      yoomee: [
+        { name: '5GB (15 Days)', amount: 2000 },
+        { name: '15GB (30 Days)', amount: 5000 },
+        { name: '50GB (30 Days)', amount: 10000 },
+      ],
+    };
+  
+    const form = useForm<z.infer<typeof internetFormSchema>>({
+      resolver: zodResolver(internetFormSchema),
+      defaultValues: {
+        provider: '',
+        bundlePackage: '',
+        amount: 0,
+        phoneNumber: user?.phoneNumber?.slice(-9) || '',
+        paymentFlow: 'direct',
+      },
+    });
+  
+    const selectedProvider = form.watch('provider');
+    const selectedPackage = form.watch('bundlePackage');
+  
+    React.useEffect(() => {
+      form.setValue('bundlePackage', '');
+      form.setValue('amount', 0);
+    }, [selectedProvider, form]);
+  
+    React.useEffect(() => {
+      if (selectedProvider && selectedPackage) {
+        const bundles = internetBundles[selectedProvider as keyof typeof internetBundles];
+        const bundle = bundles.find(b => b.name === selectedPackage);
+        if (bundle) {
+          form.setValue('amount', bundle.amount);
+        }
+      }
+    }, [selectedPackage, selectedProvider, form]);
+  
+    async function onSubmit(values: z.infer<typeof internetFormSchema>) {
+      setIsSubmitting(true);
+      try {
+        const result = await processPayment({
+          phoneNumber: values.phoneNumber,
+          amount: values.amount,
+          paymentMethod: 'mtn-momo',
+          paymentFlow: values.paymentFlow,
+          memo: `Internet Bundle for ${values.phoneNumber} (${values.bundlePackage})`,
+        });
+  
+        if (result.success) {
+          if (values.paymentFlow === 'redirect' && result.redirectUrl) {
+            window.location.href = result.redirectUrl;
+          } else {
+            toast({
+              title: 'Purchase Initiated!',
+              description: result.message,
+            });
+            form.reset();
+          }
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Purchase Failed',
+            description: result.message,
+          });
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'An Error Occurred',
+          description: 'Something went wrong. Please try again.',
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Buy Internet Data</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="provider"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Provider</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a provider" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="mtn">MTN</SelectItem>
+                        <SelectItem value="orange">Orange</SelectItem>
+                        <SelectItem value="camtel-blue">Camtel Blue</SelectItem>
+                        <SelectItem value="nexttel">Nexttel</SelectItem>
+                        <SelectItem value="yoomee">YooMee</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              {selectedProvider && (
+                <FormField
+                  control={form.control}
+                  name="bundlePackage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bundle Package</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a bundle" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {internetBundles[selectedProvider as keyof typeof internetBundles].map(bundle => (
+                            <SelectItem key={bundle.name} value={bundle.name}>
+                              {bundle.name} - {bundle.amount} XAF
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+  
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder="e.g., 670000000" {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amount (XAF)</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} value={field.value ?? 0} readOnly disabled className="bg-muted" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+  
+              <FormField
+                control={form.control}
+                name="paymentFlow"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Payment Method</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                        disabled={isSubmitting}
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="direct" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Direct Mobile Money Charge
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="redirect" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Web Redirect
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting || !selectedPackage}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? 'Processing...' : 'Buy Data'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    );
+  }
 
 export default function PayBillsPage() {
   const searchParams = useSearchParams();
@@ -562,6 +806,10 @@ export default function PayBillsPage() {
 
   if (category === 'tv') {
     return <TvSubscriptionForm />;
+  }
+
+  if (category === 'internet') {
+    return <InternetPaymentForm />;
   }
 
   // Default content or other categories can be handled here
