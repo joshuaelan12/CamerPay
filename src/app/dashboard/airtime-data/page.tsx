@@ -106,7 +106,7 @@ export default function AirtimeDataPage() {
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a type" />
-                        </Trigger>
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="airtime">Airtime</SelectItem>
@@ -171,7 +171,7 @@ export default function AirtimeDataPage() {
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a payment method" />
-                      </Trigger>
+                      </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="mtn-momo">MTN MoMo</SelectItem>
