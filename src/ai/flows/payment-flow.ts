@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Tranzak payment processing flow.
@@ -15,6 +16,8 @@ const PaymentRequestInputSchema = z.object({
   phoneNumber: z.string().describe('The phone number to charge.'),
   amount: z.number().describe('The amount to charge.'),
   paymentMethod: z.string().describe('The payment channel (e.g., mtn-momo).'),
+  paymentFlow: z.enum(['direct', 'redirect']).optional().default('direct').describe('The payment flow to use.'),
+  memo: z.string().optional().default('CamerPay Payment'),
 });
 export type PaymentRequestInput = z.infer<typeof PaymentRequestInputSchema>;
 
@@ -22,6 +25,7 @@ const PaymentRequestOutputSchema = z.object({
   success: z.boolean().describe('Whether the payment request was successful.'),
   message: z.string().describe('A message detailing the result.'),
   transactionId: z.string().optional().describe('The transaction ID if successful.'),
+  redirectUrl: z.string().optional().describe('The URL to redirect the user to for payment.'),
 });
 export type PaymentRequestOutput = z.infer<typeof PaymentRequestOutputSchema>;
 
@@ -51,13 +55,17 @@ const processPaymentFlow = ai.defineFlow(
     const requestId = uuidv4();
     const currencyCode = 'XAF';
 
-    const requestBody = {
+    const requestBody: any = {
         amount: input.amount,
         currency_code: currencyCode,
         request_id: requestId,
-        memo: 'CamerPay Airtime Top-up',
+        memo: input.memo,
         mno_code: input.paymentMethod === 'mtn-momo' ? 'MTN' : 'ORANGE',
         phone_number: `+237${input.phoneNumber}`,
+    };
+
+    if (input.paymentFlow === 'redirect') {
+      requestBody.redirect_url = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/history`;
     }
 
     try {
@@ -74,10 +82,16 @@ const processPaymentFlow = ai.defineFlow(
       const responseData = await response.json();
 
       if (response.ok && responseData.status === 'SUCCESSFUL') {
+        let message = 'Payment initiated successfully.';
+        if (input.paymentFlow === 'direct') {
+          message += ' Please approve the transaction on your phone.'
+        }
+        
         return {
           success: true,
-          message: 'Payment initiated successfully. Please approve the transaction on your phone.',
+          message: message,
           transactionId: responseData.transaction_id,
+          redirectUrl: responseData.redirect_url,
         };
       } else {
         console.error('Tranzak API Error:', responseData);
