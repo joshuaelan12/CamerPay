@@ -152,7 +152,6 @@ export default function AirtimeDataPage() {
               />
             )}
             
-            {/* Placeholder for Data selection */}
             {topupType === 'data' && (
                 <Card className="bg-muted/50">
                     <CardContent className="pt-6">
