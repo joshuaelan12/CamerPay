@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 
 export default function DashboardLayout({
