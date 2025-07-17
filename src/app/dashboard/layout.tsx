@@ -75,7 +75,7 @@ export default function DashboardLayout({
       <Sidebar>
         <SidebarHeader>
             <div className="flex items-center gap-2">
-                <Image src="https://placehold.co/40x40.png" alt="CamerPay Logo" width={30} height={30} data-ai-hint="logo" />
+                <Image src="https://firebasestudio.app/assets/images/CamerPay/125861b3-469f-43b9-a417-184065671151.png" alt="CamerPay Logo" width={30} height={30} />
                 <span className="font-bold text-lg text-primary">CamerPay</span>
             </div>
         </SidebarHeader>

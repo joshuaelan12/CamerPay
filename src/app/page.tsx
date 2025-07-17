@@ -10,7 +10,7 @@ export default function WelcomePage() {
     <div className="flex flex-col min-h-screen bg-background">
       <header className="p-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
-            <Image src="https://placehold.co/40x40.png" alt="CamerPay Logo" width={40} height={40} data-ai-hint="logo" />
+            <Image src="https://firebasestudio.app/assets/images/CamerPay/125861b3-469f-43b9-a417-184065671151.png" alt="CamerPay Logo" width={40} height={40} />
             <h1 className="text-2xl font-bold text-primary">CamerPay</h1>
         </div>
         <div>
