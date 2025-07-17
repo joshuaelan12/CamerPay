@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
         hostname: 'firebasestudio.app',
         port: '',
         pathname: '/**',
-      }
+      },
     ],
   },
 };
