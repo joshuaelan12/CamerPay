@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, 'react';
+import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useForm, zodResolver } from '@mantine/form';
 import * as z from 'zod';
