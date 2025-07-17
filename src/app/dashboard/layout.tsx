@@ -12,6 +12,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
@@ -24,9 +27,15 @@ import {
   HelpCircle,
   LogOut,
   Phone,
-  LayoutDashboard
+  LayoutDashboard,
+  ChevronDown,
+  Zap,
+  Droplets,
+  Tv,
+  Wifi,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 
 export default function DashboardLayout({
@@ -37,12 +46,20 @@ export default function DashboardLayout({
   const { user, logout, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isPayBillsOpen, setIsPayBillsOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  React.useEffect(() => {
+    const isPayBillsPath = pathname.startsWith('/dashboard/pay-bills');
+    if(isPayBillsPath) {
+        setIsPayBillsOpen(true);
+    }
+  }, [pathname]);
 
   if (loading) {
     return <div>Loading...</div>; // Or a proper loading spinner
@@ -63,12 +80,18 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/pay-bills', label: 'Pay Bills', icon: CreditCard },
     { href: '/dashboard/airtime-data', label: 'Airtime & Data', icon: Phone },
     { href: '/dashboard/history', label: 'Transaction History', icon: History },
     { href: '/dashboard/profile', label: 'My Profile', icon: User },
     { href: '/dashboard/support', label: 'Support', icon: HelpCircle },
   ];
+
+  const payBillsItems = [
+      { href: '/dashboard/pay-bills?category=electricity', label: 'Electricity', icon: Zap },
+      { href: '/dashboard/pay-bills?category=water', label: 'Water', icon: Droplets },
+      { href: '/dashboard/pay-bills?category=tv', label: 'TV', icon: Tv },
+      { href: '/dashboard/pay-bills?category=internet', label: 'Internet', icon: Wifi },
+  ]
 
   return (
     <SidebarProvider>
@@ -81,7 +104,44 @@ export default function DashboardLayout({
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {navItems.map((item) => (
+            {navItems.slice(0, 1).map((item) => (
+                <SidebarMenuItem key={item.href}>
+                    <Link href={item.href} className="w-full">
+                    <SidebarMenuButton isActive={pathname === item.href}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                    </SidebarMenuButton>
+                    </Link>
+                </SidebarMenuItem>
+            ))}
+
+            <Collapsible open={isPayBillsOpen} onOpenChange={setIsPayBillsOpen}>
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                        <CreditCard className="h-5 w-5" />
+                        <span>Pay Bills</span>
+                        <ChevronDown className={`h-4 w-4 ml-auto transition-transform ${isPayBillsOpen ? 'rotate-180' : ''}`} />
+                    </SidebarMenuButton>
+                </CollapsibleTrigger>
+              </SidebarMenuItem>
+              <CollapsibleContent>
+                  <SidebarMenuSub>
+                      {payBillsItems.map((item) => (
+                          <SidebarMenuSubItem key={item.href}>
+                              <Link href={item.href} className="w-full">
+                                <SidebarMenuSubButton isActive={pathname + window.location.search === item.href}>
+                                    <item.icon className="h-5 w-5" />
+                                    <span>{item.label}</span>
+                                </SidebarMenuSubButton>
+                              </Link>
+                          </SidebarMenuSubItem>
+                      ))}
+                  </SidebarMenuSub>
+              </CollapsibleContent>
+            </Collapsible>
+            
+            {navItems.slice(1).map((item) => (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href} className="w-full">
                   <SidebarMenuButton isActive={pathname === item.href}>
@@ -125,3 +185,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+    
