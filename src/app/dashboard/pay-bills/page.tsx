@@ -135,7 +135,7 @@ function EneoPaymentForm() {
                 <FormItem>
                   <FormLabel>Amount (XAF)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Enter amount" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber || undefined)} disabled={isSubmitting} />
+                    <Input type="number" placeholder="Enter amount" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.valueAsNumber || undefined)} disabled={isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -285,7 +285,7 @@ function CamWaterPaymentForm() {
                   <FormItem>
                     <FormLabel>Amount (XAF)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Enter amount" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber || undefined)} disabled={isSubmitting} />
+                      <Input type="number" placeholder="Enter amount" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.valueAsNumber || undefined)} disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -369,7 +369,7 @@ function TvSubscriptionForm() {
     defaultValues: {
       subscriberNumber: '',
       subscriptionPackage: '',
-      amount: undefined,
+      amount: 0,
       mobileWalletNumber: user?.phoneNumber?.slice(-9) || '',
       paymentFlow: 'direct',
     },
@@ -477,7 +477,7 @@ function TvSubscriptionForm() {
                 <FormItem>
                   <FormLabel>Amount (XAF)</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} readOnly disabled={isSubmitting} className="bg-muted" />
+                    <Input type="number" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} readOnly disabled={isSubmitting} className="bg-muted" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
