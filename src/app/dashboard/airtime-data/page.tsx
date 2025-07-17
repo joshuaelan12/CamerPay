@@ -55,7 +55,11 @@ export default function AirtimeDataPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      provider: "",
+      topupType: "",
       phoneNumber: "",
+      paymentMethod: "",
+      amount: undefined,
     },
   });
 
@@ -190,7 +194,7 @@ export default function AirtimeDataPage() {
                   <FormItem>
                     <FormLabel>Amount (XAF)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Enter amount" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)} disabled={isSubmitting}/>
+                      <Input type="number" placeholder="Enter amount" {...field} value={field.value ?? ''} onChange={(e) => field.onChange(e.target.valueAsNumber || undefined)} disabled={isSubmitting}/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
