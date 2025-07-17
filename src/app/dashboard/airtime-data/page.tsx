@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   provider: z.string({
@@ -40,20 +40,22 @@ const formSchema = z.object({
   }),
   amount: z.coerce.number().min(100, {
     message: "Amount must be at least 100.",
-  }),
+  }).optional(),
   paymentMethod: z.string({
     required_error: "Please select a payment method.",
   }),
 });
 
 export default function AirtimeDataPage() {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       phoneNumber: "",
-      amount: 100,
     },
   });
+
+  const topupType = form.watch("topupType");
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -104,7 +106,7 @@ export default function AirtimeDataPage() {
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a type" />
-                        </SelectTrigger>
+                        </Trigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="airtime">Airtime</SelectItem>
@@ -134,22 +136,31 @@ export default function AirtimeDataPage() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount (XAF)</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Or select a data bundle.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {topupType === 'airtime' && (
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amount (XAF)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Enter amount" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
+            {/* Placeholder for Data selection */}
+            {topupType === 'data' && (
+                <Card className="bg-muted/50">
+                    <CardContent className="pt-6">
+                        <p className="text-center text-muted-foreground">Data bundle selection will be available here soon.</p>
+                    </CardContent>
+                </Card>
+            )}
+
 
             <FormField
               control={form.control}
@@ -161,7 +172,7 @@ export default function AirtimeDataPage() {
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a payment method" />
-                      </SelectTrigger>
+                      </Trigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="mtn-momo">MTN MoMo</SelectItem>
