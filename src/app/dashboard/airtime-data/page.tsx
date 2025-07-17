@@ -1,6 +1,6 @@
 
 'use client';
-
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { processPayment } from "@/ai/flows/payment-flow";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   provider: z.string({
@@ -35,8 +37,8 @@ const formSchema = z.object({
   }),
   phoneNumber: z.string().min(9, {
     message: "Phone number must be at least 9 characters.",
-  }).max(15, {
-    message: "Phone number must not be longer than 15 characters."
+  }).max(9, {
+    message: "Phone number must be exactly 9 characters."
   }),
   amount: z.coerce.number().min(100, {
     message: "Amount must be at least 100.",
@@ -48,6 +50,8 @@ const formSchema = z.object({
 
 export default function AirtimeDataPage() {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,12 +61,54 @@ export default function AirtimeDataPage() {
 
   const topupType = form.watch("topupType");
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: "Top-up initiated!",
-      description: "Your request is being processed.",
-    });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if(topupType === 'data'){
+        toast({
+            variant: "destructive",
+            title: "Feature not available",
+            description: "Data bundle top-up is not yet implemented.",
+        });
+        return;
+    }
+    if(!values.amount) {
+        toast({
+            variant: "destructive",
+            title: "Amount is required",
+            description: "Please enter an amount for airtime top-up.",
+        });
+        return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const result = await processPayment({
+          phoneNumber: values.phoneNumber,
+          amount: values.amount,
+          paymentMethod: values.paymentMethod,
+      });
+
+      if (result.success) {
+        toast({
+          title: "Top-up initiated!",
+          description: result.message,
+        });
+        form.reset();
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Top-up Failed",
+          description: result.message,
+        });
+      }
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "An Error Occurred",
+            description: "Something went wrong. Please try again.",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -80,7 +126,7 @@ export default function AirtimeDataPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Provider</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a provider" />
@@ -102,7 +148,7 @@ export default function AirtimeDataPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Top-up Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a type" />
@@ -126,10 +172,10 @@ export default function AirtimeDataPage() {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., 670000000" {...field} />
+                    <Input placeholder="e.g., 670000000" {...field} disabled={isSubmitting}/>
                   </FormControl>
                   <FormDescription>
-                    Enter the number to top-up.
+                    Enter the 9-digit number to top-up (without country code).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -144,7 +190,7 @@ export default function AirtimeDataPage() {
                   <FormItem>
                     <FormLabel>Amount (XAF)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Enter amount" {...field} />
+                      <Input type="number" placeholder="Enter amount" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)} disabled={isSubmitting}/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -167,7 +213,7 @@ export default function AirtimeDataPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Payment Method</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a payment method" />
@@ -183,7 +229,10 @@ export default function AirtimeDataPage() {
               )}
             />
 
-            <Button type="submit" className="w-full md:w-auto">Top Up Now</Button>
+            <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? "Processing..." : "Top Up Now"}
+            </Button>
           </form>
         </Form>
       </CardContent>
