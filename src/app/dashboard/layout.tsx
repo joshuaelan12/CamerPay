@@ -48,6 +48,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isPayBillsOpen, setIsPayBillsOpen] = React.useState(false);
+  const logoSrc = "https://drive.google.com/uc?export=view&id=1SxpdoB-VAhsPRrHTxDss0ybiFYCEbZSf";
 
   React.useEffect(() => {
     if (!loading && !user) {
@@ -99,7 +100,7 @@ export default function DashboardLayout({
       <Sidebar>
         <SidebarHeader>
             <div className="flex items-center gap-2">
-                <Image src="https://firebasestudio.app/assets/images/projects/487f7394-8146-4c40-9830-1c644a86f034.png" alt="CamerPay Logo" width={30} height={30} />
+                <Image src={logoSrc} alt="CamerPay Logo" width={30} height={30} />
                 <span className="font-bold text-lg text-primary">CamerPay</span>
             </div>
         </SidebarHeader>
