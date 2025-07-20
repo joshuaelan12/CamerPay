@@ -48,7 +48,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isPayBillsOpen, setIsPayBillsOpen] = React.useState(false);
-  const logoSrc = "https://firebasestudio.app/assets/logo-C7d344l1.svg";
+  const logoSrc = "/logo.svg";
 
   React.useEffect(() => {
     if (!loading && !user) {

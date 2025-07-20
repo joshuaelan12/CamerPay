@@ -16,18 +16,6 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'firebasestudio.app',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'sdmntpraustraliaeast.oaiusercontent.com',
-        port: '',
-        pathname: '/**',
-      },
     ],
   },
 };

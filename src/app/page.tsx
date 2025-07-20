@@ -7,7 +7,7 @@ import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 
 export default function WelcomePage() {
-  const logoSrc = "https://firebasestudio.app/assets/logo-C7d344l1.svg";
+  const logoSrc = "/logo.svg";
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
