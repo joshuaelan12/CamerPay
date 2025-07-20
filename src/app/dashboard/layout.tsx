@@ -48,7 +48,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isPayBillsOpen, setIsPayBillsOpen] = React.useState(false);
-  const logoSrc = "/logo.svg";
+  const logoSrc = "/camerpay.png";
 
   React.useEffect(() => {
     if (!loading && !user) {

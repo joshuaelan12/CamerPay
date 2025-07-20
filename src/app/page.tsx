@@ -7,7 +7,7 @@ import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 
 export default function WelcomePage() {
-  const logoSrc = "/logo.svg";
+  const logoSrc = "/camerpay.png";
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
