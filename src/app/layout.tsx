@@ -1,9 +1,13 @@
-'use client';
-import type {Metadata} from 'next';
+
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/AuthContext';
 
+export const metadata: Metadata = {
+  title: 'CamerPay',
+  description: 'Pay your bills in Cameroon with ease.',
+};
 
 export default function RootLayout({
   children,
