@@ -50,6 +50,7 @@ const tvSubscriptionFormSchema = z.object({
   subscriptionPackage: z.string({ required_error: 'Please select a package.' }),
   amount: z.coerce.number(),
   mobileWalletNumber: z.string().min(9, { message: 'Please enter a valid 9-digit phone number.' }).max(9, { message: 'Please enter a valid 9-digit phone number.' }),
+  paymentProvider: z.string({ required_error: 'Please select a payment provider.' }),
   paymentFlow: z.enum(['direct', 'redirect'], {
     required_error: 'You need to select a payment method.',
   }),
@@ -427,6 +428,7 @@ function TvSubscriptionForm() {
       subscriptionPackage: '',
       amount: 0,
       mobileWalletNumber: user?.phoneNumber?.slice(-9) || '',
+      paymentProvider: '',
       paymentFlow: 'direct',
     },
   });
@@ -448,7 +450,7 @@ function TvSubscriptionForm() {
       const result = await processPayment({
         phoneNumber: values.mobileWalletNumber,
         amount: values.amount,
-        paymentMethod: 'mtn-momo',
+        paymentMethod: values.paymentProvider,
         paymentFlow: values.paymentFlow,
         memo: `TV Subscription for ${values.subscriberNumber} (${values.subscriptionPackage})`,
       });
@@ -556,6 +558,28 @@ function TvSubscriptionForm() {
                 </FormItem>
               )}
             />
+
+            <FormField
+                control={form.control}
+                name="paymentProvider"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Provider</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a payment provider" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="mtn-momo">MTN MoMo</SelectItem>
+                        <SelectItem value="orange-money">Orange Money</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
             <FormField
               control={form.control}
