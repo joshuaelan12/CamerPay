@@ -55,12 +55,23 @@ const processPaymentFlow = ai.defineFlow(
     const requestId = uuidv4();
     const currencyCode = 'XAF';
 
+    const getMnoCode = (paymentMethod: string) => {
+        switch (paymentMethod) {
+            case 'mtn-momo':
+                return 'MTN_MOMO';
+            case 'orange-money':
+                return 'ORANGE_MONEY_CAMEROON';
+            default:
+                return 'MTN'; // Fallback, though UI should prevent this
+        }
+    }
+
     const requestBody: any = {
         amount: input.amount,
         currency_code: currencyCode,
         request_id: requestId,
         memo: input.memo,
-        mno_code: input.paymentMethod === 'mtn-momo' ? 'MTN' : 'ORANGE',
+        mno_code: getMnoCode(input.paymentMethod),
         phone_number: `+237${input.phoneNumber}`,
     };
 
