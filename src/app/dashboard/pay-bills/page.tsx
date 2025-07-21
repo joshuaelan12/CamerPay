@@ -29,6 +29,7 @@ const eneoFormSchema = z.object({
   meterNumber: z.string().min(1, { message: 'Meter number is required.' }),
   amount: z.coerce.number().min(100, { message: 'Amount must be at least 100.' }),
   mobileWalletNumber: z.string().min(9, { message: 'Please enter a valid 9-digit phone number.' }).max(9, { message: 'Please enter a valid 9-digit phone number.' }),
+  paymentProvider: z.string({ required_error: 'Please select a payment provider.' }),
   paymentFlow: z.enum(['direct', 'redirect'], {
     required_error: 'You need to select a payment method.',
   }),
@@ -74,6 +75,7 @@ function EneoPaymentForm() {
       meterNumber: '',
       amount: undefined,
       mobileWalletNumber: user?.phoneNumber?.slice(-9) || '',
+      paymentProvider: '',
       paymentFlow: 'direct',
     },
   });
@@ -84,7 +86,7 @@ function EneoPaymentForm() {
       const result = await processPayment({
         phoneNumber: values.mobileWalletNumber,
         amount: values.amount,
-        paymentMethod: 'mtn-momo', // Assuming MTN for now, can be dynamic later
+        paymentMethod: values.paymentProvider,
         paymentFlow: values.paymentFlow,
         memo: `ENEO bill for meter ${values.meterNumber}`,
       });
@@ -163,6 +165,27 @@ function EneoPaymentForm() {
                    <FormDescription>
                     Enter the 9-digit number to be charged (without country code).
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="paymentProvider"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Provider</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a payment provider" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="mtn-momo">MTN MoMo</SelectItem>
+                      <SelectItem value="orange-money">Orange Money</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
