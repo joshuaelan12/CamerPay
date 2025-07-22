@@ -44,7 +44,7 @@ const processPaymentFlow = ai.defineFlow(
     const appId = process.env.TRANZAK_APP_ID;
     
     if (!apiKey || !appId) {
-      console.error('Tranzak API key or App ID is not configured.');
+      console.error('Tranzak API key or App ID is not configured in environment variables.');
       return {
         success: false,
         message: 'Server configuration error. Please contact support.',
@@ -62,7 +62,7 @@ const processPaymentFlow = ai.defineFlow(
             case 'orange-money':
                 return 'ORANGE_MONEY_CAMEROON';
             default:
-                return 'MTN'; // Fallback, though UI should prevent this
+                return 'MTN_MOMO'; // Default to MTN MoMo
         }
     }
 
